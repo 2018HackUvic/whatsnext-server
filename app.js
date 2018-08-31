@@ -5,7 +5,7 @@ var logger = require('morgan');
 var bodyParser = require('body-parser');
 
 var apiRouter = require('./routes/router');
-
+const dbConfig = require('./config/database.config.js');
 var mongoose = require('mongoose');
 var app = express();
 
@@ -18,10 +18,18 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Db connection
-mongoose.connect('mongodb://localhost/test');
-let db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
+// Configuring the database
+mongoose.Promise = global.Promise;
+
+// Connecting to the database
+mongoose.connect(dbConfig.url, {
+    useNewUrlParser: true
+}).then(() => {
+    console.log("Successfully connected to the database");    
+}).catch(err => {
+    console.log('Could not connect to the database. Exiting now...');
+    process.exit();
+});
 
 app.use('/api', apiRouter);
 
