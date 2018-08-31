@@ -4,7 +4,6 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var bodyParser = require('body-parser');
 
-var apiRouter = require('./routes/router');
 const dbConfig = require('./config/database.config.js');
 var mongoose = require('mongoose');
 var app = express();
@@ -12,7 +11,7 @@ var app = express();
 app.use(logger('dev'));
 app.use(express.json());
 
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 app.use(cookieParser());
@@ -22,16 +21,22 @@ app.use(express.static(path.join(__dirname, 'public')));
 mongoose.Promise = global.Promise;
 
 // Connecting to the database
-mongoose.connect(dbConfig.url, {
-    useNewUrlParser: true
-}).then(() => {
-    console.log("Successfully connected to the database");    
-}).catch(err => {
+mongoose
+  .connect(
+    dbConfig.url,
+    {
+      useNewUrlParser: true
+    }
+  )
+  .then(() => {
+    console.log('Successfully connected to the database');
+  })
+  .catch(err => {
     console.log('Could not connect to the database. Exiting now...');
     process.exit();
-});
+  });
 
-app.use('/api', apiRouter);
+app.use(require('./controllers'));
 
 // Handling errors
 app.use((req, res, next) => {
